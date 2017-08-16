@@ -11,6 +11,7 @@ import (
 	"io/ioutil"
 	"net/http"
 	"net/url"
+	"sort"
 	"strconv"
 	"strings"
 )
@@ -81,26 +82,26 @@ func (s *SovrnAdapter) Call(ctx context.Context, req *pbs.PBSRequest, bidder *pb
 	if len(userId) > 0 {
 		httpReq.AddCookie(&http.Cookie{Name: "ljt_reader", Value: userId})
 	}
-	anResp, err := ctxhttp.Do(ctx, s.http.Client, httpReq)
+	sResp, err := ctxhttp.Do(ctx, s.http.Client, httpReq)
 	if err != nil {
 		return nil, err
 	}
 
-	debug.StatusCode = anResp.StatusCode
+	debug.StatusCode = sResp.StatusCode
 
-	if anResp.StatusCode == 204 {
+	if sResp.StatusCode == 204 {
 		return nil, nil
 	}
 
-	defer anResp.Body.Close()
-	body, err := ioutil.ReadAll(anResp.Body)
+	defer sResp.Body.Close()
+	body, err := ioutil.ReadAll(sResp.Body)
 	if err != nil {
 		return nil, err
 	}
 	responseBody := string(body)
 
-	if anResp.StatusCode != 200 {
-		return nil, fmt.Errorf("HTTP status %d; body: %s", anResp.StatusCode, responseBody)
+	if sResp.StatusCode != 200 {
+		return nil, fmt.Errorf("HTTP status %d; body: %s", sResp.StatusCode, responseBody)
 	}
 
 	if req.IsDebug {
@@ -142,6 +143,7 @@ func (s *SovrnAdapter) Call(ctx context.Context, req *pbs.PBSRequest, bidder *pb
 		}
 	}
 
+	sort.Sort(bids)
 	return bids, nil
 }
 func (a *SovrnAdapter) SkipNoCookies() bool {
