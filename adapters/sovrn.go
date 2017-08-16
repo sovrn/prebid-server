@@ -1,29 +1,17 @@
 package adapters
 
 import (
-	//"bytes"
-	"context"
-	//"encoding/json"
-	//"errors"
-	"fmt"
-	//"io/ioutil"
-	//"net/http"
-	"net/url"
-	//
-	"github.com/prebid/prebid-server/pbs"
-	//
-	//"golang.org/x/net/context/ctxhttp"
-	//
-	//"github.com/prebid/openrtb"
-	"net/http"
-	"encoding/json"
-	//"golang.org/x/net/context/ctxhttp"
-	//"runtime/debug"
-	"golang.org/x/net/context/ctxhttp"
-	"github.com/prebid/openrtb"
-	//"strings"
 	"bytes"
+	"context"
+	"encoding/json"
+	"fmt"
+	"github.com/prebid/openrtb"
+	"github.com/prebid/prebid-server/pbs"
+	"golang.org/x/net/context/ctxhttp"
 	"io/ioutil"
+	"net/http"
+	"net/url"
+	"strconv"
 	"strings"
 )
 
@@ -34,8 +22,9 @@ type SovrnAdapter struct {
 }
 
 type sovrnParams struct {
-	TagId      string `json:"tagid"`
+	TagId int `json:"tagid"`
 }
+
 /* Name - export adapter name */
 func (a *SovrnAdapter) Name() string {
 	return "sovrn"
@@ -67,7 +56,7 @@ func (s *SovrnAdapter) Call(ctx context.Context, req *pbs.PBSRequest, bidder *pb
 		if err != nil {
 			return nil, err
 		}
-		sovrnReq.Imp[i].TagID = params.TagId // todo: where does tag id come from?
+		sovrnReq.Imp[i].TagID = strconv.Itoa(params.TagId)
 		sovrnReq.Imp[i].Banner.Format = nil
 
 	}
@@ -90,8 +79,8 @@ func (s *SovrnAdapter) Call(ctx context.Context, req *pbs.PBSRequest, bidder *pb
 	httpReq.Header.Set("Content-Type", "application/json")
 	userId := strings.TrimSpace(sReq.User.ID)
 	if len(userId) > 0 {
-	  httpReq.AddCookie(&http.Cookie{Name: "ljt_reader", Value: userId});
-    }
+		httpReq.AddCookie(&http.Cookie{Name: "ljt_reader", Value: userId})
+	}
 	anResp, err := ctxhttp.Do(ctx, s.http.Client, httpReq)
 	if err != nil {
 		return nil, err
@@ -124,7 +113,6 @@ func (s *SovrnAdapter) Call(ctx context.Context, req *pbs.PBSRequest, bidder *pb
 		return nil, err
 	}
 
-
 	bids := make(pbs.PBSBidSlice, 0)
 
 	numBids := 0
@@ -137,7 +125,7 @@ func (s *SovrnAdapter) Call(ctx context.Context, req *pbs.PBSRequest, bidder *pb
 				return nil, fmt.Errorf("Unknown ad unit code '%s'", bid.ImpID)
 			}
 
-			adm,_ := url.QueryUnescape(bid.AdM);
+			adm, _ := url.QueryUnescape(bid.AdM)
 			pbid := pbs.PBSBid{
 				BidID:       bidID,
 				AdUnitCode:  bid.ImpID,
@@ -148,6 +136,7 @@ func (s *SovrnAdapter) Call(ctx context.Context, req *pbs.PBSRequest, bidder *pb
 				Width:       bid.W,
 				Height:      bid.H,
 				DealId:      bid.DealID,
+				NURL:        bid.NURL,
 			}
 			bids = append(bids, &pbid)
 		}
