@@ -65,6 +65,7 @@ func TestSovrntMultiImpPartialBidding(t *testing.T) {
 	server := service.Server
 	ctx := context.TODO()
 	req := SampleSovrnRequest(2, t)
+
 	bidder := req.Bidders[0]
 	adapter := NewSovrnAdapter(adapters.DefaultHTTPAdapterConfig, server.URL, "http://sovrn/userSync?", "http://localhost")
 	bids, _ := adapter.Call(ctx, req, bidder)
@@ -96,6 +97,7 @@ func TestSovrnMultiImpAllBid(t *testing.T) {
 }
 
 func SampleSovrnRequest(numberOfImpressions int, t *testing.T) *pbs.PBSRequest {
+	ljt_reader := "sovrnUser123";
 	req := pbs.PBSRequest{
 		AccountID: "1",
 		AdUnits:   make([]pbs.AdUnit, 2),
@@ -119,9 +121,9 @@ func SampleSovrnRequest(numberOfImpressions int, t *testing.T) *pbs.PBSRequest {
 				},
 			},
 		}
-
 	}
 
+	req.User.ID = ljt_reader;
 	body := new(bytes.Buffer)
 	err := json.NewEncoder(body).Encode(req)
 	if err != nil {
@@ -131,7 +133,7 @@ func SampleSovrnRequest(numberOfImpressions int, t *testing.T) *pbs.PBSRequest {
 	httpReq := httptest.NewRequest("POST", CreateSovrnService(adapters.BidOnTags("")).Server.URL, body)
 	httpReq.Header.Add("Referer", "http://news.pub/topnews")
 	pc := pbs.ParsePBSCookieFromRequest(httpReq)
-	pc.TrySync("sovrn", "sovrnUser123")
+	pc.TrySync("sovrn", ljt_reader)
 	fakewriter := httptest.NewRecorder()
 	pc.SetCookieOnResponse(fakewriter, "")
 	httpReq.Header.Add("Cookie", fakewriter.Header().Get("Set-Cookie"))
