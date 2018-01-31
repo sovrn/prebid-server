@@ -23,8 +23,8 @@ const (
 	BidderLifestreet BidderName = "lifestreet"
 	BidderPubmatic   BidderName = "pubmatic"
 	BidderPulsepoint BidderName = "pulsepoint"
-	BidderRubicon 	BidderName = "rubicon"
-	BidderSovrn 	 	BidderName = "sovrn"
+	BidderRubicon    BidderName = "rubicon"
+	BidderSovrn      BidderName = "sovrn"
 	BidderConversant BidderName = "conversant"
 )
 
@@ -37,7 +37,7 @@ var BidderMap = map[string]BidderName{
 	"pubmatic":        BidderPubmatic,
 	"pulsepoint":      BidderPulsepoint,
 	"rubicon":         BidderRubicon,
-	"sovrn":      	  BidderSovrn,
+	"sovrn":           BidderSovrn,
 	"conversant":      BidderConversant,
 }
 

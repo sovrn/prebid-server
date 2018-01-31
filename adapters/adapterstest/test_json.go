@@ -139,9 +139,9 @@ func (req *httpRequest) ToRequestData(t *testing.T) *adapters.RequestData {
 }
 
 type httpRequest struct {
-	Body json.RawMessage `json:"body"`
-	Uri  string          `json:"uri"`
-	Headers http.Header `json:"headers"`
+	Body    json.RawMessage `json:"body"`
+	Uri     string          `json:"uri"`
+	Headers http.Header     `json:"headers"`
 }
 
 type httpResponse struct {
