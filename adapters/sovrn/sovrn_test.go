@@ -17,7 +17,17 @@ import (
 	"github.com/prebid/prebid-server/adapters"
 	"github.com/prebid/prebid-server/cache/dummycache"
 	"github.com/prebid/prebid-server/config"
+	"github.com/prebid/prebid-server/adapters/adapterstest"
 )
+
+func TestJsonSamples(t *testing.T) {
+	sovrnAdapter := NewSovrnBidder(new(http.Client), "http://sovrn.com/test/endpoint", "http://sovrn.com/pixel?", "http://prebid.server")
+	adapterstest.RunJSONBidderTest(t, "sovrntest", sovrnAdapter)
+}
+
+// ----------------------------------------------------------------------------
+// Code below this line tests the legacy, non-openrtb code flow. It can be deleted after we
+// clean up the existing code and make everything openrtb.
 
 var testSovrnUserId = "SovrnUser123"
 var testUserAgent = "user-agent-test"

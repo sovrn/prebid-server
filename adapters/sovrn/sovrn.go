@@ -249,7 +249,7 @@ func preprocess(imp *openrtb.Imp) (string, error) {
 		return "", err
 	}
 
-	imp.TagID = strconv.Itoa(sovrnExt.TagId)
+	imp.TagID = sovrnExt.TagId
 	imp.BidFloor = sovrnExt.BidFloor
 	imp.Banner.Format = nil
 
