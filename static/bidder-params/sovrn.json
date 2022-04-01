@@ -2,8 +2,8 @@
   "$schema": "http://json-schema.org/draft-04/schema#",
   "title": "Sovrn Adapter Params",
   "description": "A schema which validates params accepted by the Sovrn adapter",
-
   "type": "object",
+
   "properties": {
     "tagid": {
       "type": "string",
@@ -16,8 +16,119 @@
     "bidfloor": {
       "type": "number",
       "description": "The minimium acceptable bid, in CPM, using US Dollars"
+    },
+    "mimes": {
+      "type": "array",
+      "description": "Content MIME types supported",
+      "items": {
+        "type": "string"
+      }
+    },
+    "minduration": {
+      "type": "integer",
+      "description": "Minimum video ad duration in seconds"
+    },
+    "maxduration": {
+      "type": "integer",
+      "description": "Maximum video ad duration in seconds"
+    },
+    "protocols": {
+      "type": "array",
+      "description": "The array of supported video protocols",
+      "items": {
+        "type": "integer"
+      }
+    },
+    "w": {
+      "type": "integer",
+      "description": "Width of the video player in device independent pixels (DIPS)"
+    },
+    "h": {
+      "type": "integer",
+      "description": "Height of the video player in device independent pixels (DIPS)"
+    },
+    "startdelay": {
+      "type": "integer",
+      "description": "Indicates the start delay in seconds for pre-roll, mid-roll, or post-roll ad placements"
+    },
+    "placement": {
+      "type": "integer",
+      "description": "Placement type for the impression. Refer to List 5.9"
+    },
+    "linearity": {
+      "type": "integer",
+      "description": "Indicates if the impression must be linear, nonlinear, etc. Allowed by default"
+    },
+    "skip": {
+      "type": "integer",
+      "description": "Indicates if the player will allow the video to be skipped, where 0 = no, 1 = yes"
+    },
+    "skipmin": {
+      "type": "integer",
+      "description": "Only if the ad is skippable. Videos of total duration greater than this number of seconds can be skippable"
+    },
+    "skipafter": {
+      "type": "integer",
+      "description": "Only if the ad is skippable. Number of seconds a video must play before skipping is enabled"
+    },
+    "sequence": {
+      "type": "integer",
+      "description": "For multiple ad in the same bid request. This value allow will for the coordinated delivery of multiple ad"
+    },
+    "battr": {
+      "type": "array",
+      "description": "Blocked creative attributes",
+      "items": {
+        "type": "integer"
+      }
+    },
+    "maxextended": {
+      "type": "integer",
+      "description": "Max extended ad duration beyond the maxduration if extension is allowed. Blank or 0 - blocked. -1 - allowed without time limit"
+    },
+    "minbitrate": {
+      "type": "integer",
+      "description": "Minimum bit rate in Kbps"
+    },
+    "maxbitrate": {
+      "type": "integer",
+      "description": "Maximum bit rate in Kbps"
+    },
+    "boxingallowed": {
+      "type": "integer",
+      "description": "Indicates if letter-boxing of 4:3 content into a 16:9 window is allowed, where 0 = no, 1 = yes"
+    },
+    "playbackmethod": {
+      "type": "array",
+      "description": "Playback methods that may be in use",
+      "items": {
+        "type": "integer"
+      }
+    },
+    "playbackend": {
+      "type": "integer",
+      "description": "The event that causes playback to end"
+    },
+    "delivery": {
+      "type": "array",
+      "description": "Supported delivery methods (1 = streaming, 2 = progressive, 3 = download). If none specified, assume all are supported.",
+      "items": {
+        "type": "integer"
+      }
+    },
+    "pos": {
+      "type": "integer",
+      "description": "Ad position on screen"
+    },
+    "api": {
+      "type": "array",
+      "description": "List of supported API frameworks for this impression",
+      "items": {
+        "type": "integer"
+      }
     }
   },
+  "required": ["mimes", "minduration", "maxduration", "protocols"],
   "oneOf": [
     { "required" : [ "tagid" ] },
     { "required" : [ "tagId" ] }
