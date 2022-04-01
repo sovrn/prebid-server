@@ -260,15 +260,35 @@ func (s *SovrnAdapter) MakeBids(internalRequest *openrtb2.BidRequest, externalRe
 			adm, err := url.QueryUnescape(bid.AdM)
 			if err == nil {
 				bid.AdM = adm
+
+				bidType := openrtb_ext.BidTypeBanner
+
+				isVideoBid := isVideo(bidReq.Imp[0])
+				if isVideoBid {
+					bidType = openrtb_ext.BidTypeVideo
+				}
+
 				bidResponse.Bids = append(bidResponse.Bids, &adapters.TypedBid{
 					Bid:     &bid,
-					BidType: openrtb_ext.BidTypeBanner,
+					BidType: bidType,
 				})
 			}
 		}
 	}
 
 	return bidResponse, nil
+}
+
+func isVideo(imp openrtb2.Imp) bool {
+	video := imp.Video
+	if video != nil {
+		if sovrnExt.Mimes == nil ||
+			sovrnExt.Minduration == 0 ||
+			sovrnExt.Maxduration == 0 ||
+			sovrnExt.Protocols == nil {
+			return false
+		}
+	}
 }
 
 func preprocess(imp *openrtb2.Imp) (string, error) {
@@ -290,6 +310,19 @@ func preprocess(imp *openrtb2.Imp) (string, error) {
 
 	if imp.BidFloor == 0 && sovrnExt.BidFloor > 0 {
 		imp.BidFloor = sovrnExt.BidFloor
+	}
+
+	// Handle video params
+	video := imp.Video
+	if video != nil {
+		if sovrnExt.Mimes == nil ||
+			sovrnExt.Minduration == 0 ||
+			sovrnExt.Maxduration == 0 ||
+			sovrnExt.Protocols == nil {
+			return "", &errortypes.BadInput{
+				Message: "Missing required video parameter",
+			}
+		}
 	}
 
 	return imp.TagID, nil
