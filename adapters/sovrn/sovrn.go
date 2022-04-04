@@ -254,33 +254,33 @@ func addHeaderIfNonEmpty(headers http.Header, headerName string, headerValue str
 	}
 }
 
-func (s *SovrnAdapter) MakeBids(internalRequest *openrtb2.BidRequest, externalRequest *adapters.RequestData, response *adapters.ResponseData) (*adapters.BidderResponse, []error) {
-	if response.StatusCode == http.StatusNoContent {
+func (s *SovrnAdapter) MakeBids(request *openrtb2.BidRequest, requestData *adapters.RequestData, responseData *adapters.ResponseData) (*adapters.BidderResponse, []error) {
+	if responseData.StatusCode == http.StatusNoContent {
 		return nil, nil
 	}
 
-	if response.StatusCode == http.StatusBadRequest {
+	if responseData.StatusCode == http.StatusBadRequest {
 		return nil, []error{&errortypes.BadInput{
-			Message: fmt.Sprintf("Unexpected status code: %d. Run with request.debug = 1 for more info", response.StatusCode),
+			Message: fmt.Sprintf("Unexpected status code: %d. Run with request.debug = 1 for more info", responseData.StatusCode),
 		}}
 	}
 
-	if response.StatusCode != http.StatusOK {
+	if responseData.StatusCode != http.StatusOK {
 		return nil, []error{&errortypes.BadServerResponse{
-			Message: fmt.Sprintf("Unexpected status code: %d. Run with request.debug = 1 for more info", response.StatusCode),
+			Message: fmt.Sprintf("Unexpected status code: %d. Run with request.debug = 1 for more info", responseData.StatusCode),
 		}}
 	}
 
-	var bidResp openrtb2.BidResponse
-	if err := json.Unmarshal(response.Body, &bidResp); err != nil {
+	var bidResponse openrtb2.BidResponse
+	if err := json.Unmarshal(responseData.Body, &bidResponse); err != nil {
 		return nil, []error{&errortypes.BadServerResponse{
 			Message: err.Error(),
 		}}
 	}
 
-	bidResponse := adapters.NewBidderResponseWithBidsCapacity(5)
+	response := adapters.NewBidderResponseWithBidsCapacity(5)
 
-	for _, sb := range bidResp.SeatBid {
+	for _, sb := range bidResponse.SeatBid {
 		for i := 0; i < len(sb.Bid); i++ {
 			bid := sb.Bid[i]
 			adm, err := url.QueryUnescape(bid.AdM)
@@ -289,12 +289,11 @@ func (s *SovrnAdapter) MakeBids(internalRequest *openrtb2.BidRequest, externalRe
 
 				bidType := openrtb_ext.BidTypeBanner
 
-				isVideoBid := isVideo(bidReq.Imp[0])
-				if isVideoBid {
+				if request.Imp[0].Video != nil {
 					bidType = openrtb_ext.BidTypeVideo
 				}
 
-				bidResponse.Bids = append(bidResponse.Bids, &adapters.TypedBid{
+				response.Bids = append(response.Bids, &adapters.TypedBid{
 					Bid:     &bid,
 					BidType: bidType,
 				})
@@ -302,44 +301,7 @@ func (s *SovrnAdapter) MakeBids(internalRequest *openrtb2.BidRequest, externalRe
 		}
 	}
 
-	return bidResponse, nil
-}
-
-func preprocess(imp *openrtb2.Imp) (string, error) {
-	var bidderExt adapters.ExtImpBidder
-	if err := json.Unmarshal(imp.Ext, &bidderExt); err != nil {
-		return "", &errortypes.BadInput{
-			Message: err.Error(),
-		}
-	}
-
-	var sovrnExt openrtb_ext.ExtImpSovrn
-	if err := json.Unmarshal(bidderExt.Bidder, &sovrnExt); err != nil {
-		return "", &errortypes.BadInput{
-			Message: err.Error(),
-		}
-	}
-
-	imp.TagID = getTagid(sovrnExt)
-
-	if imp.BidFloor == 0 && sovrnExt.BidFloor > 0 {
-		imp.BidFloor = sovrnExt.BidFloor
-	}
-
-	// Handle video params
-	video := imp.Video
-	if video != nil {
-		if sovrnExt.Mimes == nil ||
-			sovrnExt.Minduration == 0 ||
-			sovrnExt.Maxduration == 0 ||
-			sovrnExt.Protocols == nil {
-			return "", &errortypes.BadInput{
-				Message: "Missing required video parameter",
-			}
-		}
-	}
-
-	return imp.TagID, nil
+	return response, nil
 }
 
 func getTagid(sovrnExt openrtb_ext.ExtImpSovrn) string {
