@@ -174,28 +174,6 @@ func (s *SovrnAdapter) Call(ctx context.Context, req *pbs.PBSRequest, bidder *pb
 }
 
 func (s *SovrnAdapter) MakeRequests(request *openrtb2.BidRequest, reqInfo *adapters.ExtraRequestInfo) ([]*adapters.RequestData, []error) {
-	errs := make([]error, 0, len(request.Imp))
-
-	for i := 0; i < len(request.Imp); i++ {
-		_, err := preprocess(&request.Imp[i])
-		if err != nil {
-			errs = append(errs, err)
-			request.Imp = append(request.Imp[:i], request.Imp[i+1:]...)
-			i--
-		}
-	}
-
-	// If all the requests were malformed, don't bother making a server call with no impressions.
-	if len(request.Imp) == 0 {
-		return nil, errs
-	}
-
-	reqJSON, err := json.Marshal(request)
-	if err != nil {
-		errs = append(errs, err)
-		return nil, errs
-	}
-
 	headers := http.Header{}
 	headers.Add("Content-Type", "application/json")
 	if request.Device != nil {
@@ -212,6 +190,54 @@ func (s *SovrnAdapter) MakeRequests(request *openrtb2.BidRequest, reqInfo *adapt
 		if len(userID) > 0 {
 			headers.Add("Cookie", fmt.Sprintf("%s=%s", "ljt_reader", userID))
 		}
+	}
+
+	errs := make([]error, 0, 1)
+	var err error
+	requestImpCopy := request.Imp
+
+	imp := requestImpCopy[0]
+
+	var bidderExt adapters.ExtImpBidder
+	if err := json.Unmarshal(imp.Ext, &bidderExt); err != nil {
+		errs = append(errs, &errortypes.BadInput{
+			Message: err.Error(),
+		})
+		return nil, errs
+	}
+
+	var sovrnExt openrtb_ext.ExtImpSovrn
+	if err := json.Unmarshal(bidderExt.Bidder, &sovrnExt); err != nil {
+		errs = append(errs, &errortypes.BadInput{
+			Message: err.Error(),
+		})
+		return nil, errs
+	}
+
+	imp.TagID = getTagid(sovrnExt)
+
+	if imp.BidFloor == 0 && sovrnExt.BidFloor > 0 {
+		imp.BidFloor = sovrnExt.BidFloor
+	}
+
+	// Handle video params
+	video := imp.Video
+	if video != nil {
+		if sovrnExt.Mimes == nil ||
+			sovrnExt.Minduration == 0 ||
+			sovrnExt.Maxduration == 0 ||
+			sovrnExt.Protocols == nil {
+			errs = append(errs, &errortypes.BadInput{
+				Message: "Missing required video parameter",
+			})
+			return nil, errs
+		}
+	}
+
+	reqJSON, err := json.Marshal(request)
+	if err != nil {
+		errs = append(errs, err)
+		return nil, errs
 	}
 
 	return []*adapters.RequestData{{
@@ -277,18 +303,6 @@ func (s *SovrnAdapter) MakeBids(internalRequest *openrtb2.BidRequest, externalRe
 	}
 
 	return bidResponse, nil
-}
-
-func isVideo(imp openrtb2.Imp) bool {
-	video := imp.Video
-	if video != nil {
-		if sovrnExt.Mimes == nil ||
-			sovrnExt.Minduration == 0 ||
-			sovrnExt.Maxduration == 0 ||
-			sovrnExt.Protocols == nil {
-			return false
-		}
-	}
 }
 
 func preprocess(imp *openrtb2.Imp) (string, error) {
