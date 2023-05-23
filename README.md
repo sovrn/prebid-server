@@ -68,3 +68,20 @@ Or better yet, [open a pull request](https://github.com/prebid/prebid-server/com
 
 The quickest way to start developing Prebid Server in a reproducible environment isolated from your host OS
 is by using Visual Studio Code with [Remote Container Setup](devcontainer.md).
+
+## To Run Locally for Development
+
+add file with minimal required environment variables (vars.sh)
+```
+export PBS_GDPR_DEFAULT_VALUE=0
+export PBS_DEBUG=true
+```
+load environment vars
+```
+source vars.sh
+```
+Run
+```
+./prebid-server  -logtostderr
+```
+
