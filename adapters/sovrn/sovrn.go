@@ -177,6 +177,8 @@ func (s *SovrnAdapter) MakeBids(request *openrtb2.BidRequest, bidderRequest *ada
 					continue
 				} else if request.Imp[impIdx].Video != nil {
 					bidType = openrtb_ext.BidTypeVideo
+				} else if request.Imp[impIdx].Native != nil {
+					bidType = openrtb_ext.BidTypeNative
 				}
 
 				response.Bids = append(response.Bids, &adapters.TypedBid{
