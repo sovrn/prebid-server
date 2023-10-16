@@ -131,6 +131,7 @@ var coreBidderNames []BidderName = []BidderName{
 	BidderKiviads,
 	BidderLmKiviads,
 	BidderKrushmedia,
+	BidderLemmadigital,
 	BidderLiftoff,
 	BidderLimelightDigital,
 	BidderLockerDome,
@@ -423,6 +424,7 @@ const (
 	BidderKiviads           BidderName = "kiviads"
 	BidderLmKiviads         BidderName = "lm_kiviads"
 	BidderKrushmedia        BidderName = "krushmedia"
+	BidderLemmadigital      BidderName = "lemmadigital"
 	BidderLiftoff           BidderName = "liftoff"
 	BidderLimelightDigital  BidderName = "limelightDigital"
 	BidderLockerDome        BidderName = "lockerdome"
