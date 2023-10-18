@@ -203,7 +203,6 @@ var coreBidderNames []BidderName = []BidderName{
 	BidderVideoByte,
 	BidderVideoHeroes,
 	BidderVidoomy,
-	BidderViewdeos,
 	BidderVisibleMeasures,
 	BidderVisx,
 	BidderVox,
@@ -492,7 +491,6 @@ const (
 	BidderVideoByte         BidderName = "videobyte"
 	BidderVideoHeroes       BidderName = "videoheroes"
 	BidderVidoomy           BidderName = "vidoomy"
-	BidderViewdeos          BidderName = "viewdeos"
 	BidderVisibleMeasures   BidderName = "visiblemeasures"
 	BidderVisx              BidderName = "visx"
 	BidderVox               BidderName = "vox"
