@@ -160,6 +160,7 @@ import (
 	"github.com/prebid/prebid-server/v2/adapters/smilewanted"
 	"github.com/prebid/prebid-server/v2/adapters/sonobi"
 	"github.com/prebid/prebid-server/v2/adapters/sovrn"
+	"github.com/prebid/prebid-server/v2/adapters/sovrnXsp"
 	"github.com/prebid/prebid-server/v2/adapters/sspBC"
 	"github.com/prebid/prebid-server/v2/adapters/stroeerCore"
 	"github.com/prebid/prebid-server/v2/adapters/suntContent"
