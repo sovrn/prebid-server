@@ -75,10 +75,6 @@ func (s *SovrnAdapter) MakeRequests(request *openrtb2.BidRequest, reqInfo *adapt
 
 		imp.TagID = tagId
 
-		if imp.BidFloor == 0 && sovrnExt.BidFloor > 0 {
-			imp.BidFloor = sovrnExt.BidFloor
-		}
-
 		var impExtBuffer []byte
 		impExtBuffer, err = json.Marshal(&sovrnImpExt{
 			Bidder:     sovrnExt,
